@@ -1,64 +1,64 @@
 #include <stdio.h>
 
-// ==========================================
-// โปรแกรมหลัก (ถามจำนวนไบต์ รับค่าทีละชุด และคำนวณ Checksum)
-// ==========================================
+//##########################################
+//    Main Program ask values
+//##########################################
 int main() {
-    const char hex_chars[] = "0123456789ABCDEF";            // ตารางตัวอักษรฐาน 16 (ตรงกับ hex_chars ใน .data)
-    char buffer[16];                                        // พื้นที่พักข้อความเลขฐาน 2 ที่รับเข้ามา
+    const char hex_chars[] = "0123456789ABCDEF";
+    char buffer[16];
 
-    int count;                                              // ตัวแปรเก็บจำนวนไบต์ ($s0)
+    int count;
     printf("How many bytes: ");
-    scanf("%d", &count);                                    // รับจำนวนไบต์จากคีย์บอร์ด
+    scanf("%d", &count);
 
-    int i = 0;                                              // ตัวนับรอบการรับข้อมูล ($t0)
-    unsigned int sum = 0;                                   // ผลรวมทั้งหมด ($s1)
+    int i = 0;
+    unsigned int sum = 0;
 
-    if (count <= 0) {                                       // เช็ก count <= 0 (blez $s0, error_exit)
+    if (count <= 0) {
         printf("Invalid count.\n");
         return 1;
     }
 
-    // ------------------------------------------
-    // 1. วนลูปรับเลขฐาน 2 แบบ do-while และบวกรวมทันที
-    // ------------------------------------------
+//##########################################
+//    Loop binary and sum
+//##########################################
     do {
         printf("8-bit binary: ");
-        scanf("%15s", buffer);                              // รับข้อความเลขฐาน 2 เก็บลง buffer
+        scanf("%15s", buffer);
 
-        char *p = buffer;                                   // Pointer ชี้ตัวอักษรแรก ($t1)
-        unsigned int value = 0;                             // ตัวแปรพักค่าเลขฐาน 10 ของชุดนี้ ($t2)
+        char *p = buffer;
+        unsigned int value = 0;
 
         while (1) {
-            unsigned int bit = (unsigned int)(*p++ - '0');  // อ่าน *p เลื่อน p++ และแปลงเป็น 0/1 ($t3)
-            if (bit >= 2) break;                            // เช็กช่วง 0–1 ในครั้งเดียว (ตรงกับ sltiu $t4, $t3, 2)
-            value = (value << 1) + bit;                     // เลื่อนบิตซ้าย 1 ตำแหน่ง แล้วบวกบิตปัจจุบัน
+            unsigned int bit = (unsigned int)(*p++ - '0');
+            if (bit >= 2) break;
+            value = (value << 1) + bit;
         }
 
-        sum += value;                                       // บวกเข้าผลรวมทันที ($s1 += $t2)
-        i++;                                                // เพิ่มตัวนับรอบ ($t0++)
-    } while (i < count);                                    // เช็กเงื่อนไขท้ายลูป ลดคำสั่ง jump (slt + bne)
+        sum += value;
+        i++;
+    } while (i < count);
 
-    // ------------------------------------------
-    // 2. คำนวณ Wrap-around และ 1's Complement
-    // ------------------------------------------
-    unsigned int carry;                                     // ตัวแปรเก็บบิตที่ล้นเกิน 8 บิต ($t4)
-    while ((carry = sum >> 8) != 0) {                       // เลื่อนขวา 8 บิตเพื่อเช็กและนำมาใช้บวกทบในรอบเดียว
-        sum = (sum & 0xFF) + carry;                         // ทบบิตที่ล้นกลับเข้า 8 บิตล่าง
+//##########################################
+//    Wrap around and one complement
+//##########################################
+    unsigned int carry;
+    while ((carry = sum >> 8) != 0) {
+        sum = (sum & 0xFF) + carry;
     }
-    unsigned int checksum = (~sum) & 0xFF;                  // กลับบิต (nor) และตัดเหลือ 8 บิตล่าง ($s2)
+    unsigned int checksum = (~sum) & 0xFF;
 
-    // ------------------------------------------
-    // 3. แสดงผลลัพธ์ (Binary และ Hex)
-    // ------------------------------------------
+//##########################################
+//    Print binary and Hex
+//##########################################
     printf("Checksum (Bin): ");
-    i = 7;                                                  // เริ่มจากบิตซ้ายสุด ($t0 = 7)
+    i = 7;
     do {
-        printf("%d", (checksum >> i) & 1);                  // ดึงค่าทีละบิตจากซ้ายไปขวา
+        printf("%d", (checksum >> i) & 1);
         i--;
-    } while (i >= 0);                                       // เช็กท้ายลูป (bgez $t0, print_bin)
+    } while (i >= 0);
 
-    printf("\nChecksum (Hex): 0x%c%c\n",                    // ใช้ Lookup Table แสดง 4 บิตบนและ 4 บิตล่าง
+    printf("\nChecksum (Hex): 0x%c%c\n",
            hex_chars[checksum >> 4],
            hex_chars[checksum & 0x0F]);
 
