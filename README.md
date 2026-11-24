@@ -23,7 +23,7 @@ An interactive 8-bit 1's complement checksum calculator implemented in both **C*
 | `count` | `$s0` | Total number of 8-bit bytes to read |
 | `sum` | `$s1` | Running total and folded 8-bit sum |
 | `checksum` | `$s2` | Final 8-bit 1's complement checksum |
-| `i` | `$t0` | Loop counter (input loop & binary print loop) |
+| `i` | `$t0` | Loop counter |
 | `p` / `hex_chars` | `$t1` | String pointer for buffer / hex lookup table |
 | `value` | `$t2` | Parsed integer value of the current byte |
 | `bit` / temp | `$t3` | Current ASCII bit or intermediate bit-mask value |
